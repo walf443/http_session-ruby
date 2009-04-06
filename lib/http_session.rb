@@ -1,6 +1,6 @@
 # Extensible Session Manager for Web Service.
 class HTTPSession
-  attr_reader :store, :state, :env, :is_changed, :is_fresh
+  attr_reader :store, :state, :request, :is_changed, :is_fresh
 
   def initialize hash
 
@@ -8,8 +8,8 @@ class HTTPSession
       raise ':store missing'
     @state = hash[:state] or
       raise ':state missing'
-    @env = hash[:env] or
-      raise ':env missing'
+    @request = hash[:request] or
+      raise ':request missing'
 
     @data = {}
     @sid_length = hash[:sid_length] || 30
@@ -22,7 +22,7 @@ class HTTPSession
   end
 
   def _load_session
-    session_id = @state.get_session_id
+    session_id = @state.get_session_id @request
     if session_id
       data = @store.select(session_id)
       if data

@@ -5,8 +5,8 @@ class HTTPSession
       end
 
       def select key; end
-      def insert key; end
-      def update key; end
+      def insert key, val; end
+      def update key, val; end
       def delete key; end
     end
   end

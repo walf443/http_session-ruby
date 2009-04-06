@@ -10,6 +10,10 @@ class HTTPSession
         @expires = hash[:expires]
       end
 
+      def permissive?
+        false
+      end
+
       def get_session_id req
         cookie = req.cookies
         cookie[@name]
@@ -22,11 +26,12 @@ class HTTPSession
       def header_filter session_id, res
         cookie = {
           :path   => @path,
+          :value  => session_id,
         }
         cookie[:domain] = @domain if @domain
         cookie[:expires] = @expires if @expires
 
-        res.set_cookie(session_id, cookie)
+        res.set_cookie(@name, cookie)
       end
     end
   end
