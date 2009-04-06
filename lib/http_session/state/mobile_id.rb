@@ -9,9 +9,11 @@ class HTTPSession
           raise 'mising :mobile'
 
         @check_ip = hash[:check_ip] || true
+        @permissive = hash[:check_ip].nil? ? true : hash[:check_ip]
       end
 
       def permissive?
+        !!@permissive
       end
 
       def get_session_id

@@ -1,6 +1,6 @@
 # Extensible Session Manager for Web Service.
 class HTTPSession
-  attr_reader :store, :state, :env
+  attr_reader :store, :state, :env, :is_changed, :is_fresh
 
   def initialize hash
 
@@ -15,6 +15,10 @@ class HTTPSession
     @sid_length = hash[:sid_length] || 30
     # XXX: SecureRandom is missing on ruby 1.8.x
     @generator = hash[:generator] || HTTPSession::Generator::SecureRandom
+  end
+
+  def setup
+    _load_session
   end
 
   def _load_session
@@ -44,10 +48,59 @@ class HTTPSession
     @generator.generate(@sid_length)
   end
 
-  # some environment can't use Cookie. for example, some japanese mobile phone.( DoComo )
-  # So, custarmize html by user to identify.
   def response_filter res
     @state.response_filter(@session_id, res)
+  end
+
+  def finalize
+    if @is_fresh
+      @store.insert(@session_id, @data)
+    else
+      if @is_changed
+        @store.update(@session_id, @data)
+      end
+    end
+  end
+
+  def keys
+    @data.keys
+  end
+
+  def get key
+    @date[key]
+  end
+
+  alias [] get
+
+  def set key, val
+    @is_changed = true
+    @date[key] = val
+  end
+
+  alias []= set
+
+  def remove key
+    @is_changed = true
+    @data.delete key
+  end
+
+  def to_hash
+    @data.dup
+  end
+
+  def expire
+    @store.delete(@session_id)
+    @expired = true
+  end
+
+  %w[ redirect_filter header_filter html_filter ].each do |meth|
+    define_method meth do |res|
+      if @state.respond_to? meth
+        @state.__send__ meth, @session_id, res
+      else
+        res
+      end
+    end
   end
 
   # namespace for session_id generator
@@ -59,6 +112,7 @@ class HTTPSession
   module State
     autoload :Null, 'http_session/state/null'
     autoload :MobileID, 'http_session/state/mobile_id'
+    autoload :Cookie, 'http_session/state/cookie'
   end
 
   # namespace for session strage
