@@ -67,14 +67,14 @@ class HTTPSession
   end
 
   def get key
-    @date[key]
+    @data[key]
   end
 
   alias [] get
 
   def set key, val
     @is_changed = true
-    @date[key] = val
+    @data[key] = val
   end
 
   alias []= set
