@@ -1,0 +1,44 @@
+= http_session
+flexible and extensible session manager.
+
+== Synopsis
+
+  require 'http_session'
+  require 'rack'
+
+  def call env
+    @session = HTTP::Session.new(
+      request => Rack::Request.new(env),
+      state => HTTP::Session::State::Cookie.new(
+      ),
+      store => HTTP::Session::Store::Memcached.new(
+        :memd => MemCached.new(:servers => [qw/ 127.0.0.1:11211 / ],),
+      ),
+    )
+    @session.setup
+
+    @session[key] = val
+    @session[key]  # => val
+    @session.delete # => delete session data.
+
+    # do something.
+    res = @app.call(env)
+
+    res = @session.session.response_filter(res)
+  ensure
+    @session.finalize
+  end
+
+== Description
+
+This library is port of perl's HTTP::Session.
+
+== SEE ALSO
+
+HTTP::Session: http://search.cpan.org/~tokuhirom/HTTP-Session/
+
+rack
+jpmobile
+memcache-client
+
+== Copyright
