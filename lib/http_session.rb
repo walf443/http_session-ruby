@@ -118,6 +118,7 @@ class HTTPSession
   # namespace for session strage
   module Store
     autoload :Null, 'http_session/store/null'
+    autoload :Memcached, 'http_session/store/memcached'
   end
 end
 
